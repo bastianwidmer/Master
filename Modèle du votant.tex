@@ -1,0 +1,672 @@
+
+\documentclass[a4paper,11pt]{article}  
+% définit la classe {article} et les options {11pt}
+%permet d'utiliser des sources LaTeX contenant des caractères accentués % unicode
+\usepackage[utf8]{inputenc} 
+% police
+\usepackage{lmodern}
+% utilise le  nouveau standard pour le codage de caractères 
+\usepackage[T1]{fontenc}
+% adapte le texte aux conventions typographiques françaises
+\usepackage[francais]{babel}
+\usepackage{amsmath}
+\usepackage{amsthm,amssymb}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{xypic}
+\usepackage[all]{xy}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+
+\newtheoremstyle{break}
+  {\topsep}{\topsep}%
+  {\itshape}{}%
+  {\bfseries}{}%
+  {\newline}{}%
+\theoremstyle{break}
+%commandes
+\newcommand{\EnsQuotient}[2]{\ensuremath{#1/\!\raisebox{-.65ex}{\ensuremath{#2}}}} %Commande pour écrire les ensembles quotients proprement
+
+\DeclareMathOperator{\coker}{coker} %Définit la commande pour coker
+\DeclareMathOperator{\im}{im} %Définit la commande pour écrire l'image
+
+% environnement theorem, proposition, etc.
+
+\theoremstyle{break}
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemme}
+\newtheorem{corollary}[theorem]{Corollaire}
+
+\theoremstyle{definition}
+\newtheorem{examples}[theorem]{Exemples}
+\newtheorem{example}[theorem]{Exemple}
+\newtheorem{definition}[theorem]{Définition}
+
+\theoremstyle{remark}
+\newtheorem{remarque}[theorem]{Remarque}
+\newtheorem{notation}[theorem]{Notation}
+
+\title{Le Modèle Du Votant}
+\author{Bastian Widmer\\
+\\
+supervisé par le Prof. Clément Hongler et Laurence S. Field\\
+\\}
+
+\date{décembre 2016}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Dans ce travail, nous nous intéressons au modèle du votant, en particulier au modèle du votant linéaire sur $\mathbb{Z}^d$. L'outil principal est ce que l'on appelle la dualité; la correspondance une à une entre les modèles du votant linéaires et les marches aléatoires coalescentes. Les propriétés y sont traitées pour les cas de marches aléatoires récurrentes et transientes.
+\end{abstract}
+
+
+\section*{Introduction}
+Le modèle du votant est à la base un modèle purement probabiliste et c'est seulement plus tard que l'on a remarqué qu'il simulait bien l'évolution des votes d'un ensemble de personnes, d'où son nom de modèle du "votant". Le principe de ce modèle est de représenter un ensemble de personnes comme étant un sous ensemble de $\mathbb{Z}^d$, tous ayant une opinion de départ donné. Au fil du temps leurs opinions sont influencés par leurs voisins et ont une certaine probabilité de changer. Le théorème le plus important pour l'étude du modèle du votant linéaire est l'équation de la dualité, $P^\eta (\eta_t \equiv 1 \text{ sur } A) = P^A (\eta \equiv 1 \text{ sur } A_t)$. Elle nous permet de voir l'évolution des votes comme étant un ensemble de marches aléatoires. Ensuite, à l'aide de cette égalité je démontre que le comportement du modèle est fortement influencé par la dimension du réseau, plus précisément on a des résultats complètement différents selon si les marches aléatoires sur ce réseau sont récurrentes ou transientes. On remarque que l'étude du modèle pour les marches aléatoires transientes demande plus de précautions. La majorité des résultats ont été démontré par Thomas M. Liggett, c'est donc naturellement que je me suis basé sur les livres \textit{Interacting Particle Systems} \cite{liggett2012interacting} et \textit{Stochastic Interacting Systems: Contact, Voter and Exclusion Processes} \cite{liggett1999stochastic} et en particulier le document \textit{Interacting Particle Systems-An Introduction} \cite{Liggettpdf} pour ce travail. Le lecteur pourra, s'il le souhaite, y trouver plus d'informations, en particulier par rapport à la suite du sujet.
+
+
+\section{Modèle du votant}
+Le modèle du votant est un processus de Markov $\eta_t$ ayant pour espace de valeur $X=\{0,1\}^{\mathbb{Z}^d}$. On supposera que toute personne qui vote se trouve sur un point du réseau $\mathbb{Z}^d$. Une configuration $\eta\in X$ représente l'opinion 0 ou 1 de chaque votant $x\in\mathbb{Z}^d$ dans le réseau. Le taux auquel une personne $x\in\mathbb{Z}^d$ dans une configuration $\eta\in X$ change d'opinion est exprimé par la fonction $c(x,\eta)$. De tels processus avec ce type de transitions sont appelés "systèmes de spin". On supposera que la fonction $c$ sera toujours positive, bornée et continue par rapport à sa seconde variable. $c$ vérifiera également les propriétés suivantes:
+\begin{enumerate}
+\item $c(x,\eta)=0$ pour tout $x\in\mathbb{Z}^d$ si $\eta\equiv 0$ ou $\eta\equiv 1$,
+\item $c(x,\eta)=c(x,\xi)$ pour tout $x\in\mathbb{Z}^d$ si $\eta (y) + \xi (y) =1$ pour tout $y\in\mathbb{Z}^d$,
+\item $c(x,\eta ) \leq c(x,\xi)$ si $\eta\leq\xi$ et $\eta(x) = \xi(x) = 0$, et
+\item $c(x,\eta)$ est invariant sous translations dans $\mathbb{Z}^d$.
+\end{enumerate}
+Tout l’intérêt de ce modèle repose sur l'évolution d'un processus $\eta_t$.
+
+On va dans ce projet en particulier s'interesser au modèle du votant linéaire. Soit $p(\cdot,\cdot)$ la probabilité de transition pour une marche aléatoire dans $\mathbb{Z}^d$. Le modèle du votant linéaire est un système de spin ayant pour valeur $c(x,\eta)$ donné par
+$$
+c(x,\eta)=\left\{\begin{array}{ll}
+\sum\limits_y p(x,y)\eta (y) & si\; \eta(x)=0,\\
+\sum\limits_y p(x,y)(1-\eta (y))&si\; \eta(x)=1,
+\end{array}\right.
+$$
+où $p(x,y)\geq 0$ pour tout $x,y\in X$ et $\sum\limits_y p(x,y)=1$ pour tout $x\in X$.
+
+\subsection{Marches aléatoires coalescentes}
+Nous allons maintenant nous intéresser à la théorie de la coalescence qui nous sera utile pour la notion de dualité qui sera définie plus tard. 
+
+\begin{definition}%coalescence
+Soient $X^x_t$ et $X^y_t$ deux marches aléatoires indépendantes ayant des points de départ différents $x\neq y$. Si les deux marches aléatoires se rencontrent au temps $\tau$ et que $X^x_t=X^y_t$ pour tout $t\geq \tau$, alors on dit qu'elles coalescent.
+\end{definition}
+
+\begin{remarque}
+Deux marches aléatoires ne sont plus indépendantes à partir du moment où elles coalescent.
+\end{remarque}
+
+\begin{definition}
+Supposons que nous avons un réseau $\mathbb{Z}^d$ et que pour chaque point du réseau $x\in\mathbb{Z}^d$ nous avons une marche aléatoire $(X^x_t)$ en temps continue qui a pour point de départ $x$. En tous points dans $x\in \mathbb{Z}^d$, la marche aléatoire attend un temps $t_x$ indépendamment des autres marches aléatoires et se déplace vers l'un de ses voisins $y\in\mathbb{Z}^d$ avec probabilité $p(x,y)$. Le temps d'attente $t_x$ suit une loi exponentielle de paramètre 1. Si deux marches aléatoires $(X^x_t)$ et $(X^y_t)$ ayant des points de départ différents $x\neq y$ se rencontrent au même temps $t$, alors elles coalescent et continuerons la marche aléatoire ensemble.
+\end{definition}
+
+La raison pour laquelle les deux marches aléatoire peuvent être vue comme une seule marche aléatoire après  leur rencontre est dû au fait que notre processus est un processus de Markov. En effet, on peut voir les deux marches aléatoires comme des chaînes de Markov en temps discret où l'on considère l'état de la marche aléatoire uniquement aux instants $t_i$ où $(X^x_t)$ se déplace, c'est à dire que $t_i$ est le temps qui s'est écoulé avant que $(X^x_t)$ se soit déplacé $i$ fois. Ainsi on peut voir les marches aléatoires comme étant discrètes. Supposons que les deux marches aléatoires se rencontrent pour la première fois en $z\in\mathbb{Z}^d$ au temps $\tilde{t}$. Soit $\{t_i\}$ et $\{s_i\}$ les temps où les marches aléatoires $(X^x_t)$ et $(Y^y_t)$ se déplacent respectivement. Disons que c'est le $n$-ième déplacement pour $(X^x_t)$ et le $m$-ième déplacement pour $(Y^y_t)$ et supposons s.p.d.g. que $(X^x_t)$ arrive en premier et que donc $\tilde{t}=s_m\in[t_n , t_{n+1}]$. Par la propriété de Markov on a alors
+\begin{align*}
+\mathbb{P}(X_{t_n+1}=z & \ \vert \ X_{t_0}, X_{t_1},..., X_{t_n}, X_{\tilde{t}})\\
+&=\mathbb{P}(X_{t_n+1}=z \ \vert \ X_{\tilde{t}})\\
+&=\mathbb{P}(Y_{t_n+1}=z \ \vert \ Y_{s_m})\\
+&=\mathbb{P}(Y_{t_n+1}=z \ \vert \ Y_{s_0}, Y_{s_1},..., Y_{s_m}),
+\end{align*}
+car $X_{\tilde{t}}=Y_{s_m}$ et donc  $(X^x_t)$ et $(Y^y_t)$ se comportent de la même manière à partir du temps $\tilde{t}$.\\
+
+
+Posons $A_t$ le processus dual des marches aléatoire après leurs couplage au temps $t$, partant de $A$, autrement dit $A_t={(X^x_t \ \vert \ x\in A)}$. On a alors
+$$
+A_0 :=A, 
+$$
+$$
+A_{t-t_n}:=(A\setminus \{ x_n \} ) \cup \{ y_n \},
+$$
+$$
+A_{t_{i+1}-t_i}:=(A_{t_{i+1}}\setminus \{ x_i \} ) \cup \{ y_i \},
+$$
+pour tout $i=1,...,n-1$.\\
+
+Le modèle linéaire est particulièrement intéressant car il satisfait l'égalité suivante:
+
+\begin{proposition}
+Pour tout ensemble fini $A\subseteq\mathbb{Z}^d$ et toute configuration initiale $\eta$, on a
+\begin{equation} \label{eq:dual}
+P^\eta (\eta_t \equiv 1 \text{ sur } A) = P^A (\eta \equiv 1 \text{ sur } A_t),
+\end{equation}
+\end{proposition}
+
+\begin{remarque}
+L'équation \eqref{eq:dual} est ce que l'on appellera la dualité.
+\end{remarque}
+
+\begin{proof}
+Soit $N_t(x,y)$ un processus de poisson pour tout $x\sim y$ sur un ensemble de votant $A$ fini après un temps $t$ fixé, ayant pour configuration initiale $\eta$. Les changements d'opinions se font aux instants $0< t_1< t_2<...<t_n<t$, c'est à dire $x_i\in A$ prend la même opinion que $y_i\in A$ au moment $t_i$ pour $i=1,...,n$. Pour un votant $x\in A$ on a
+$$
+\eta_0 (x) = \eta(x),
+$$
+$$
+\eta_{t_i+1} (x) = \left\{\begin{array}{ll}
+\eta_{t_i} (x) & si\; x\neq x_{i+1}\\
+\eta_{t_i} (y_i)&si\; x=x_{i+1},
+\end{array}\right.
+$$
+et $\eta_s=\eta_{t_i}$ pour tout $t_i\leqslant s<t_{i+1}$ pour tout $i=1,..., n-1$.
+\end{proof}
+
+La partie gauche de l'égalité \eqref{eq:dual} représente la probabilité d'avoir la configuration $\eta_t \equiv 1$ sur tout $A$ après un temps $t$ ayant $\eta$ pour configuration initiale, alors que la partie droite représente  la probabilité d'avoir la valeur $1$ sur tout $A_t$ ayant pour configuration initiale $A$. Pour comprendre cette égalité, imaginons que nous avons $\eta \equiv 1$ sur $A_t$, on a donc $X^x_t=1 \ \forall x\in A$, or ça revient à dire que notre configuration vaut $\eta_t \equiv 1$ pour toutes marches aléatoires commençant en $A$ après un temps $t$.
+
+\subsection{Comportement asymptotique}
+On va supposer pour cette section que la probabilité de transition  d'une marche aléatoire irréductible soit invariante par translation, c'est à dire qu'elle vérifie $p(x,y)=p(0,y-x)$. 
+
+\begin{definition} %livre gregory F, introduction sto
+Soit $X_n$ une chaîne de Markov irréductible sur $\mathbb{Z}^d$ avec probabilité de transition $p(\cdot,\cdot)$. On dit que $X_n$ est \textbf{récurrente} si la probabilité que $X_n$ passe par $x$ vaut $1$ pour tout $x\in\mathbb{Z}^d$, c'est à dire
+$$
+P(X_n=x \text{ pour une infinité de }n ) =1.
+$$
+Si
+$$
+P(X_n=x \text{ pour une infinité de }n ) <1,
+$$
+on dira que $X_n$ est \textbf{transiente}.
+\end{definition}
+
+\begin{remarque}
+On a en faite $P(X_n=x \text{ pour une infinité de n} ) =1 $ si et seulement si $P(X_n=x \text{ pour un certain }n\geq 1 ) =1 $ et de manière équivalente on a $P(X_n=x \text{ pour une infinité de n} ) <1 $ si et seulement si $P(X_n=x \text{ pour un certain }n\geq 1 ) <1. $
+\end{remarque}
+
+On verra que le comportement asymptotique d'un processus dépend grandement de la propriété de récurrence ou de transience de la marche aléatoire symétrisée $X(t)-Y(t)$, où $X(t)$ et $Y(t)$ sont deux marches aléatoires indépendantes.
+
+\begin{definition}
+On dit que $\eta_t$ se \textbf{regroupe} si%clusters% 
+$$
+\lim_{t\rightarrow\infty}P^{\eta}(\eta_t (x) \neq\eta_t (y))=0,
+$$
+pour tout $x,y\in\mathbb{Z}^d$ et toute configuration initiale $\eta$.
+On dit que $\eta_t$ \textbf{coexiste} si il y a une configuration stationnaire avec une infinité de $0$ et une infinité de $1$.
+\end{definition}
+
+\begin{lemma}\label{sousensemble}
+Soit $g(A)=P^A(\vert A_t\vert < \vert A \vert$ pour un certain $t > 0)$. Alors on a
+\begin{enumerate}
+\item $g(A)\leq g(B)$, $\forall A\subseteq B$;
+\item Pour $A$ un ensemble non vide, $g(A)\leq \sum\limits_{B\subset A,\vert B\vert=2} g(B)$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+Supposons qu'après un temps $t$ on ait $\vert A_t\vert < \vert A \vert$. Il existe donc $x,y\in A$ tel que $X^x_t$ et $X^y_t$ coalescent. Or, $x,y\in B$ et donc on a aussi un couplage dans le dual des marches aléatoires sur $B$, $\vert B_t\vert < \vert B \vert$, ce qui prouve \textit{1.}
+Pour \textit{2.} soient $X^{x_1}_t,...,X^{x_n}_t$ des marches aléatoires indépendantes partant de $x_1,...,x_n\in A$ respectivement et tel que $x_i\neq x_j$ $\forall 1\leq i<j\leq \vert A\vert$. Alors
+\begin{align*}
+g(A)&=P^A(\vert A_t\vert < \vert A \vert\text{ pour un certain }t > 0)\\
+&=P(X^{x_i}_t=X^{x_j}_t,  \text{ pour un certain } 1\leq i<j\leq \vert A\vert,\ t > 0)\\
+&\leq \sum\limits_{1\leq i<j\leq \vert A\vert} P(X^{x_i}_t=X^{x_j}_t \text{ pour un certain }t > 0)\\
+&=\sum\limits_{1\leq i<j\leq \vert A\vert}g(\{ X^{x_i}_t,X^{x_j}_t\})\\
+&=\sum\limits_{B\subset A,\vert B\vert=2} g(B),
+\end{align*}
+où l'inégalité vient du fait que les événements ne sont pas disjoints.
+\end{proof}
+\subsection{Le cas récurrent}
+On va supposer ici que pour des marches aléatoires indépendantes $X(t)$ et $Y(t)$, $X(t)-Y(t)$ soit récurrente.
+
+\begin{lemma}
+Pour tout ensemble $\emptyset\neq A\subset\mathbb{Z}^d$ fini, on a
+$$
+P^A(\exists T> 0 \text{ tel que } \forall t>T, \ \vert A_t \vert = 1 )=1
+$$
+\end{lemma}
+\begin{proof}
+On va faire une preuve par récurrence. Le cas $\vert A \vert = 2 $ est clair par la supposition que $X(t)-Y(t)$ soit récurrente, où $X(0),Y(0)\in A$. On suppose alors que l'affirmation soit vraie pour $\vert A \vert = n\geqslant 2 $; montrons que c'est aussi vrai pour $\vert A \vert = n+1 $. Soit $\emptyset\neq A\subset\mathbb{Z}^d$ tel que $\vert A \vert = n+1 $. Soit $\tau=\inf\{ t>0 \text{ tel que } \vert A_\tau \vert < \vert A\vert\}$; alors $\tau$ est fini. En effet, prenons deux marches aléatoires indépendants partantes de points quelconques $x_1, x_2\in A$. Alors par hypothèse d'induction, avec probabilité égal à 1, il existe un temps $T$ fini tel que les deux marches aléatoires se rencontres. En particulier, $\tau \leq T$. On a donc $\vert A_\tau \vert \leq \vert A \vert -1 = n$ et donc par induction%peut etre encore modifier, la feuille est interessante
+\begin{multline*}
+P^A(\exists T> 0 \text{ tel que } \forall t>T, \ \vert A_t \vert = 1 ) \\ =P^{A_\tau}(\exists T> 0 \text{ tel que } \forall t>T, \ \vert {(A_\tau)}_t \vert = 1 )=1.
+\end{multline*}
+\end{proof}
+
+\begin{notation}
+Notons par $I$ la classe des distributions stationnaires pour le processus et par $I_e$ les points extrêmes de $I$. Soit $\mu S(t)$ la distribution au temps $t$ si la distribution initiale est $\mu$. 
+\end{notation}
+
+On a le résultat suivant.
+
+\begin{theorem}
+\begin{enumerate}
+\item Pour tout $\eta \in \{0,1\}^S$ et tout $x,y\in S$,
+$$
+\lim_{t\to\infty} P^\eta (\eta_t(x) \neq \eta_t(y))=0.
+$$
+\item $I_e =\{ \delta_0 , \delta_1\}$.
+\item Si $\mu\{\eta\ \vert \ \eta(x)=1\}=\lambda$ pour tout $x\in S$, alors
+$$
+\lim_{t\to\infty} \mu S(t)=\lambda \delta_1 + (1-\lambda ) \delta_0.
+$$ 
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Posons $A=\{x,y\}$. Soient $X(t)$ et $Y(t)$ deux marches aléatoires coalescentes partant de $x$ et $y$ respectivement et soit $\tau$ le temps nécessaire pour qu'elles coalescent. Alors 
+$$ 
+P^\eta (\eta_t(x) \neq \eta_t(y))\leq P^A(\vert A_t \vert =2 )\leq P(\tau > t)\rightarrow 0,
+$$
+par le lemme précédent, ce qui prouve \textit{1.}
+
+Pour la partie \textit{2}, si $\mu \in \emph{I}_e$, on  a
+$$
+\mu\{\eta \ \vert \ \eta (x) \neq \eta(y) \} = P^\mu (\eta_t (x) \neq \eta_t (y)) = \int P^\eta (\eta_t(x) \neq \eta_t (y))\mu (d\eta),
+$$
+ce que tend vers $0$ quand $t\rightarrow\infty$ par la partie \textit{1}. On a donc $\eta\equiv 0$ avec une certaine probabilité $p$ et $\eta\equiv 1$ avec probabilité $1-p$. Mais puisque $\mu \in \emph{I}_e$ on a  $\mu \{ \eta\equiv 0\} = 1$ ou $\mu \{ \eta\equiv 1\} = 1$.
+Pour la dernière partie, en utilisant la dualité, on a pour $A\neq \emptyset$ un ensemble fini 
+\begin{multline*}
+\mu S(t) \{ \eta \ \vert \ \eta \equiv 1 \text{ sur }A\} -\lambda =\int P^A (\vert A_t\vert> 1 ;\eta_t \equiv 1 \text{ sur }A_t) \mu (d\eta) -\lambda P^A(\vert A_t\vert> 1).
+\end{multline*}
+Mais
+\begin{multline*}
+(1-\lambda)P^A(\vert A_t\vert >1)\geq\int P^A (\vert A_t\vert> 1 ;\eta_t \equiv 1 \text{ sur }A_t) \mu (d\eta) -\lambda P^A(\vert A_t\vert> 1) \\ 
+\geq (-\lambda)P^A(\vert A_t\vert >1),
+\end{multline*}
+et donc on a
+$$
+\vert\mu S(t) \{\eta\ \vert \ \eta\equiv 1 \text{ sur } A \} - \lambda\vert \leq P^A(\vert A_t\vert >1),
+$$
+ce qui tend vers $0$ quand $t\rightarrow\infty$ par le lemme précédent.
+\end{proof}
+
+\subsection{Le cas transient}
+On va supposer ici que pour des marches aléatoires indépendantes $X(t)$ et $Y(t)$, $X(t)-Y(t)$ soit transiente. On commence par montrer comment construire une mesure stationnaire non triviale. 
+
+\begin{theorem}\label{murho}
+Pour $0\leq\rho\leq 1$, on définit $\nu_\rho$ de 
+la manière suivante: $\nu_\rho \{\eta\ \vert \ \eta\equiv 1 \text{ sur } A\}=\rho^{\vert A\vert}$ pour tout $A\subset S$. Alors la limite faible
+$$
+\mu_\rho:= \lim_{t\rightarrow\infty} \nu_\rho S(t)
+$$
+existe.
+\end{theorem}
+
+\begin{proof}
+En utilisant la dualité on a
+$$
+\nu_\rho S(t) \{ \eta \ \vert \ \eta \equiv 1 \text{ sur }A\} =\int P^\eta (\eta_t \equiv 1 \text{ sur }A ) d\nu_\rho = \int P^A (\eta \equiv 1 \text{ sur } A_t)d\nu_\rho
+$$
+$$
+\sum\limits_B P^A (A_t=B)\int P^A (\eta \equiv 1 \text{ sur } B)d\nu_\rho=\sum\limits_B P^A (A_t=B) \int \prod\limits_{x\in B}\eta (x)  d\nu_\rho
+$$
+$$
+=E^A \rho^{\vert A_t \vert}.
+$$
+Puisque $\vert A_t \vert$ est décroissante pour tout $A \subset S$ fini on a que $\nu_\rho S(t) \{ \eta \ \vert \ \eta \equiv 1 \text{ sur }A\}$ existe et donc la limite faible
+$$
+\mu_\rho= \lim_{t\rightarrow\infty} \nu_\rho S(t)
+$$
+existe.
+\end{proof}
+
+Avant de continuer, nous allons étudier quelques propriétés de la fonction $g(A)=P^A(\vert A_t\vert < \vert A \vert$ pour un certain $t > 0)$ pour le cas transient.
+
+\begin{lemma}\label{g(0,x)}
+\begin{enumerate}
+\item $lim_{\vert x\vert \rightarrow\infty} g(\{0,x\})=0$.
+\item Si $X_1 (t),...,X_n(t)$ sont des copies indépendantes d'une marche aléatoire $X(t)$, alors l'événement
+$$
+g(\{X_1 (t),...,X_n(t)\})\rightarrow 0
+$$
+est presque sûr quand $t\rightarrow\infty$.
+\item L'événement $g(A_t)\rightarrow 0$ est presque sûr pour tout $A\subset S$ non vide.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+Soit $Z(t)=X(t)-Y(t)$. Alors $Z(t)$ est une marche aléatoire symétrique et on obtient
+\begin{align*}
+P^x(Z(2t)=y)&=\sum\limits_z P^x(Z(t)=z)P^z(Z(t)=y)\\
+&\leq (\sum\limits_z (P^x(Z(t)=z))^2)^{1/2}(\sum\limits_z (P^z(Z(t)=y))^2)^{1/2}\\
+&=(P^x(Z(2t)=x)P^y(Z(2t)=y))^{1/2}\\
+&=P^0 (Z(2t)=0),
+\end{align*}
+où on a utilisé l'inégalité de Cauchy-Schwarz pour l'inégalité. En posant $y=0$ on a donc
+\begin{align*}
+&g(\{0,x\})=P^x(Z(t)=0 \text{ pour un certain }t\geq 0)\\
+&\leq P^x(Z(t)=0 \text{ pour un certain }t\leq T) +P^x(Z(t)=0 \text{ pour un certain }t>T)\\
+&\leq P^x(Z(t)=0 \text{ pour un certain }t\leq T) +P^0(Z(t)=0 \text{ pour un certain }t>T).
+\end{align*}
+Le second terme peut être arbitrairement petit en prenant $T$ assez grand, puisque $Z(t)$ est transiente. Le premier terme devient arbitrairement petit en prenant $\vert x \vert$ assez grand, ce qui prouve la première partie. 
+Pour la partie \textit{2}, commençons par remarquer que $g(A+x)=g(A)$ pour tout $x\in S$. Soit $\varepsilon >0$, alors par la partie précédente on sait qu'il existe $b$ tel que pour tout $x\in S$ tel que $\vert x \vert > b$, on a $g(\{0,x\})<\varepsilon$. Par hypothèse de transiance, il existe $T>0$ tel que $\vert X_i(t)-X_j(t)\vert >b$, pour tout $t>T$, $i\neq j$. On obtient donc que $g(\{X_i(t), X_j(t)\})=g(\{0,X_j(t)- X_i(t)\})<\varepsilon$ pour tout $t>T$. Puisque $\varepsilon$ est arbitraire on obtient que $\lim_{t\rightarrow\infty}g(\{X_i(t), X_j(t)\}) = 0.$ On conclu la partie \textit{2} avec le \textit{lemme} \ref{sousensemble}.
+La partie \textit{3} suit immédiatement en posant $\{X_1(0),...,X_n(0)\}=A$.
+\end{proof}
+
+\begin{definition}%quoi?
+Une mesure de probabilité invariante sur $\{0,1\}^{\mathbb{Z}^d}$ est dite \textbf{ergodique} (par translations) si, elle assigne une probabilité de $0$ ou de $1$ pour tout événement invariant par translation de $\{0,1\}^{\mathbb{Z}^d}$
+\end{definition}
+
+On peut maintenant démontrer les résultats suivants pour la mesure $\mu_\rho$ définie précédemment.
+
+\begin{theorem}\label{mu nu}
+Pour tout $0\leq\rho\leq 1$ la mesure $\mu_\rho$ a les propriétés suivantes:
+\begin{enumerate}
+\item Pour tout $A$ on a
+$$
+\vert \mu_\rho \{\eta \ \vert \ \eta \equiv 1 \text{ sur } A\} - \rho^{\vert A\vert}\vert\leq g(A),
+$$
+\item $\mu_\rho$ est invariant par translation et ergodique,
+\item $\mu_\rho\{\eta \ \vert \ \eta(x) = 1\}=\rho$ et
+\item $Cov_{\mu_\rho}[\eta (x), \eta (y)]=\rho(1-\rho)\frac{G(x,y)}{G(0,0)},$
+
+où $G(x,y):=\int_0^\infty P^x(Z(t)=y)dt$ est la fonction de Green pour la marche aléatoire $Z(t)$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Notons $\vert A_\infty \vert :=\lim_{t\rightarrow\infty} \vert A_t \vert$, qui existe car $\vert A_t \vert$ est décroissante et bornée par $0$. Alors par la preuve du \textit{théoreme} \ref{murho}, on a que
+\begin{equation}\label{eq:rho}
+\mu_\rho \{ \eta \ \vert \ \eta \equiv 1 \text{ sur }A\} =E\rho^{\vert A_\infty\vert}.
+\end{equation}
+On a donc
+$$
+\vert \mu_\rho \{\eta \ \vert \ \eta \equiv 1 \text{ sur } A\} - \rho^{\vert A\vert}\vert=\vert E^A\rho^{\vert A_\infty\vert}-\rho^{\vert A\vert}\vert=E^A(\rho^{\vert A_\infty\vert}-\rho^{\vert A\vert})
+$$
+$$
+=E^A[(\rho^{\vert A_\infty\vert}-\rho^{\vert A\vert})\mathds{1}_{\{\vert A_\infty\vert<\vert A\vert\} }]\leq E^A[\mathds{1}_{\{\vert A_\infty\vert<\vert A\vert\} }] =P^A (\vert A_\infty\vert<\vert A\vert)
+$$
+$$
+=\lim_{t\rightarrow\infty}P^A (\vert A_t\vert<\vert A\vert) = g(A),
+$$
+ce qui conclut la première partie. 
+Pour la partie \textit{2}, $\mu_\rho=\lim_{t\rightarrow\infty} \nu_\rho S(t)$ est invariant par translation car $\nu_\rho S(t)$ l'est pour tout $t$. Pour montrer l'ergodicité, soient $A_t$, $A_t^1$ et $A_t^2$ des copies de marches aléatoires coalescentes qui sont couplées tel que $A_t^1$ et $A_t^2$ sont indépendantes et $A_t=A_t^1\cup A_t^2$ pour $t\leq\tau$ où $\tau=\inf\{s>0 \ \vert \ A_s^1\cap A_s^2 \neq \emptyset\}$. Pour $A^1$ et $A^2$ deux ensembles disjoints, posons $A_0^1=A^1$, $A_0^2=A^2$, et $A_0=A^1\cup A^2$ leurs états initiaux. Remarquons que $\vert A_\infty\vert \leq\vert A^1_\infty\vert +\vert A^2_\infty\vert$ avec égalité seulement si  $\tau=\infty$ et donc $0\leq\rho^{\vert A_\infty\vert}-\rho^{\vert A_\infty^1\vert +\vert A_\infty^2\vert}\leq 1$. Alors par l'équation \eqref{eq:rho} on a
+$$
+\vert\mu_\rho \{\eta \ \vert \ \eta\equiv 1 \text{ sur } A^1\cup A^2\} - \mu_\rho \{\eta \ \vert \ \eta\equiv 1 \text{ sur } A^1\}\mu_\rho \{\eta \ \vert \ \eta\equiv 1 \text{ sur } A^2\}\vert
+$$
+$$
+=\vert E^A(\rho^{\vert A_\infty\vert}-\rho^{\vert A_\infty^1\vert +\vert A_\infty^2\vert})\vert\leq P(t= \infty) 0+  P(\tau < \infty) 1\leq\sum\limits_{x\in A^1, y\in A^2}g(\{x,y\}),
+$$
+ce qui tend vers $0$ quand $y-x\rightarrow\infty$ par le point \textit{1} du \textit{lemme} \ref{g(0,x)}. En remplaçant $A^2$ par $A^2 + z$ on obtient alors
+$$
+\lim_{z\rightarrow\infty}\mu_\rho \{\eta \ \vert \ \eta\equiv 1 \text{ sur } A^1\cup A^2\} = \mu_\rho \{\eta \ \vert \ \eta\equiv 1 \text{ sur } A^1\}\mu_\rho \{\eta \ \vert \ \eta\equiv 1 \text{ sur } A^2\},
+$$
+ce qui implique l'ergodicité de $\mu_\rho$.
+Pour la partie \textit{3}, en utilisant l'équation \eqref{eq:rho}, on a
+$$
+\mu_\rho\{\eta \ \vert \ \eta(x) = 1\}=E\rho^{\vert \{x\} \vert}=E\rho=\rho.
+$$
+Pour la dernière partie, en utilisant le point précèdent on a
+\begin{align*}
+Cov_\mu[\eta(x),\eta(y)]&=E[\eta (x) \eta (y)] - E[\eta (x)] E[\eta(y)]\\
+&=\int\eta(x)\eta(y)d\mu -\rho^2\\
+&=1\mu_\rho\{\eta \ \vert \ \eta\equiv 1 \text{ sur }\{x,y\}\} -\rho^2\\
+&=E[\rho^{\vert \{x,y\}_\infty\vert} - \rho^2]\\
+&=0P^{\{x,y\}}(\vert\{x,y\}_\infty\vert = 2)+(\rho-\rho^2)P^{\{x,y\}}(\vert\{x,y\}_\infty\vert = 1)\\
+&=\rho (1-\rho)P(Z(t)=0 \text{ pour un certain } t\geq 0)\\
+&=\rho (1-\rho)\frac{G(x-y,0)}{G(0,0)}\\
+&=\rho (1-\rho)\frac{G(x,y)}{G(0,0)},
+\end{align*}
+ce qui conclut la preuve.
+\end{proof}
+
+\begin{remarque}
+$A_{\infty}$ n'est pas bien définit en tant qu'ensemble, toutefois son cardinal $\vert A_{\infty}\vert$ l'est.
+\end{remarque}
+
+Pour le prochain théorème nous aurons besoin de la notion de fonction harmonique.
+
+\begin{definition}
+Une fonction $f : (\mathbb{Z}^d)^n\rightarrow \mathbb{R}$ est dite \textbf{harmonique} pour une chaîne de Markov $(X_1(t),...,X_n(t))$ sur $(\mathbb{Z}^d)^n$ si $E^{(x_1,...,x_n)} f(X_1(t),...,X_n(t)) =f(x_1,...,x_n)$ pour tout $(x_1,...,x_n)\in (\mathbb{Z}^d)^n$ et tout $t\geq 0$.
+\end{definition}
+
+\begin{theorem}
+\begin{enumerate}
+\item $I$ est l'enveloppe convexe de $\{\mu_\rho \ \vert \ 0\leq\rho \leq 1\}$.
+\item $I_e=\{\mu_\rho\ \vert \ 0\leq\rho\leq 1\}$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Notons $I'$ l'enveloppe convexe de $\{\mu_\rho \ \vert \ 0\leq\rho \leq 1\}$. On procède alors par double inclusion. On a l'inclusion $I'\subset I$ car $\mu_\rho\in I$ et $I$ est convexe et fermé. Pour $I'\supset I$, prenons $\mu\in I$. Posons $h(A)=\mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur }A\}$, $V_t f(A) = E^A f(A_t)$ et $U_t f(x1,...,x_n) = E^{x_1,...,x_n} f(X_1(t),...,X_n(t))$, où $X_1(t),...,X_n(t)$ sont des copies indépendantes de notre marche aléatoire. En utilisant la dualité on a,
+$$
+\mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur }A\} =\mu S(t)\{\eta \ \vert \ \eta \equiv 1 \text{ sur } A\} = \int P^\eta (\eta_t \equiv 1 \text{ sur } A ) d\mu 
+$$
+$$
+= \int P^A (\eta \equiv 1 \text{ sur } A) d\mu = \sum\limits_B P^A(A_t =b)\mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur }B\},
+$$
+et donc on a $h=V_t h$. On a pour toute fonction $f$ tel que $\vert f(A)\vert\leq 1$ et tout $A$,
+$$
+\vert V_t f(A)-U_t f(A)\vert = \vert E^Af(A_t)\mathds{1}_{\{t<\tau\}}-E^A f(X_1(t),...X_n(t))\mathds{1}_{\{t>\tau\}}\vert
+$$
+$$
+\leq \vert E^A\vert f(A_t)\mathds{1}_{\{t>\tau\}}\vert +E^A\vert f(X_1(t),...X_n(t))\mathds{1}_{\{t>\tau\}}\vert \leq 2 \vert\vert  f\vert\vert_\infty  g(A) \leq 2 g(A),
+$$
+où $\tau=\inf\{ t>0 \text{ tel que } \vert A_\tau \vert < \vert A\vert\}$. En remplaçant $f$ par $h$ on obtient
+\begin{equation}\label{lim Us}
+\vert h(A) - U_t h(A)\vert \leq 2 g(A),
+\end{equation}
+et donc
+$$
+\vert U_s h(A)-U_{t+s} h(A)\vert \leq 2 U_s g(A),
+$$
+car
+$$
+\vert U_s [h-U_t h](A)\vert =\vert E^A[h-U_t h] (X_1(s),...,X_n(s))\vert 
+$$
+$$
+\leq E^A \vert [h-U_th]\vert (X_1(s),...,X_n (s))= U_s [ \vert h-U_t h \vert ] (A) \leq 2 U_s g(A).
+$$%thm 2 du chapitre 1 (comment faire si pas récurrente)
+Par le point \textit{2.} du \textit{lemme} \ref{g(0,x)},  $2 U_sg(A)$ tend vers zéro quand $s$ tend vers l'infini et donc $\lim_{s\rightarrow\infty} U_s h$ existe et est harmonique pour les marches aléatoires irréductibles $(X_1(t),...,X_n(t))$ sur $(\mathbb{Z}^d)^n$. Une telle fonction harmonique est constante \cite{Liggettpdf}, et donc il existe des constantes $c_n$ telles que
+$$
+\lim_{s\rightarrow\infty} U_s h(A) = c_{\vert A\vert }
+$$
+pour tout $A$. En passant l'équation \eqref{lim Us} à la limite, on obtient
+\begin{equation}\label{ca}
+\vert h(A)-c_{\vert A\vert}\vert \leq g(A).
+\end{equation}
+On aimerait monter que $\mu$ est une combinaison de plusieurs $\mu_\rho$. Par le point \textit{1.} du \textit{théorème} \ref{mu nu}, $ \mu_\rho \{\eta \ \vert \ \eta \equiv 1 \text{ sur } A\}$ et $ \nu_\rho \{\eta \ \vert \ \eta \equiv 1 \text{ sur } A\}$ sont approximativement égaux si les éléments de $A$ sont assez dispersés. On peut donc s'attendre à ce que $c_n$ soit une combinaison de $ \nu_\rho \{\eta \ \vert \ \eta \equiv 1 \text{ sur } A\}=\rho^n$ pour $\rho\in [0,1]$. On aimerait donc montrer qu'il existe une mesure de probabilité $\gamma$ tel que 
+$$
+c_n=\int_0^1 \rho^n \gamma (d\rho).
+$$
+L'existence d'une telle mesure est vérifiée si et seulement si %Feller ...
+$$
+\sum\limits_{k=0}^n {n \choose k} (-1)^k c_{k+m}\geq 0,
+$$
+pour tout $m,n \in \mathbb{N}$ (Voir Chapitre VII.3, Théorème 1, W. Feller. An Introduction to Probability Theory and lts Applications \cite{Feller}). Fixons $m$ et $n$  et soit $A_i$ une suite d'ensembles de taille $m+n$ tel que $g(A_i)\rightarrow 0$, ce qui existe par le point \textit{2.} du \textit{lemme} \ref{g(0,x)}. Notons $A_i=B_i\cup C_i$, où $\vert B_i\vert = m$ et $\vert C_i \vert =n$. On a $g(B_i)\rightarrow 0$ et $g(C_i)\rightarrow 0$ par le point \textit{1.} du \textit{lemme} \ref{sousensemble}. Par le principe d'inclusion-exclusion on a
+$$
+\mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur } B_i,\eta\equiv 0 \text{ sur } C_i\}
+$$
+$$
+= \mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur } B_i\}-\mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur } B_i,\exists x\in C_i \ \vert \ \eta (x)\neq 0\}
+$$
+$$
+=h(B_i)-\sum\limits_{\vert F\vert =1,\ F\subset C_i}h(B_i \cap F) +\sum\limits_{\vert F\vert =2,\ F\subset C_i}h(B_i \cap F)-...(-1)^{\vert C_i \vert + 1} h(B_i\cap C_i)
+$$
+$$
+=\sum\limits_{F\subset C_i} (-1)^{\vert F\vert} h(B_i \cup F).
+$$
+En utilisant l'équation \eqref{ca} on obtient
+$$
+\lim_{i\rightarrow\infty} \mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur } B_i,\eta\equiv 0 \text{ sur } C_i\}=\sum\limits_{k=0}^n {n \choose k} (-1)^k c_{k+m},
+$$
+et pusique $\mu\{\eta \ \vert \ \eta \equiv 1 \text{ sur } B_i,\eta\equiv 0 \text{ sur } C_i\}\in [0, 1]$ pour tout $i$, on obtient bien que $\sum\limits_{k=0}^n {n \choose k} (-1)^k c_{k+m}\geq 0$.
+
+On définit $\mu'=\int_0^1 \mu_\rho\gamma (d\rho)$ et $h'(A)=\mu'\{\eta\ \vert \ \eta\equiv 1\text{ sur } A\}$. Puisque $\mu'\in I$, on a également $h'=V_th'$. Par le \textit{théorème} \ref{mu nu} on a  $\vert h'(A)-c_{\vert A\vert}\vert \leq g(A)$ et donc
+$$
+\vert h' (A)- h(A)\vert \leq \vert h' (A)-c_{\vert A\vert} \vert + \vert c_{\vert A\vert}- h(A)\vert \leq 3 g(A).
+$$
+En utilisant l'harmonicité de $V_t$ de $h$ et $h'$ on obtient
+$$
+\vert h' (A)- h(A)\vert \leq  3 V_t g(A).
+$$
+En laissant $t$ tendre vers l'infini et en utilisant le point \textit{3.} du \textit{lemme} \ref{g(0,x)} on obtient que $h'\equiv h$ et donc $\mu ' =\mu$. Pour conclure on a que
+$$
+\mu =\int_0^1 \mu_\rho \gamma (d\rho).
+$$
+
+Pour la seconde partie, on a que $\{\mu_\rho \ \vert \ 0 \leq \rho \leq 1\}\subset I_e$, car $\mu_\rho$ est ergodique par le \textit{théorème} \ref{mu nu} et les mesures ergodiques sont des points extrêmes dans la classe des mesures invariantes par translation. Pour montrer $\{\mu_\rho \ \vert \ 0 \leq \rho \leq 1\}\supset I_e$, prenons $\mu\in I_e$. Par la première partie $\mu$ est une combinaison de $\mu_\rho$, mais puisque $\mu$ est un point extrême, ça doit en particulier être un $\mu_\rho$.
+\end{proof}
+
+\begin{theorem}
+Supposons que $\mu$ est invariant par translation et ergodique. Alors 
+$$
+\lim_{t\rightarrow\infty} \mu S(t) =\mu_\rho,
+$$
+où $\rho=\mu\{ \eta \ \vert \ \eta (0) =1\}$.
+\end{theorem}
+\begin{proof}
+Soit $h(A)=\mu\{ \eta \ \vert \ \eta \equiv 1\text{ sur } A\}$, $h_1(A)=\mu_\rho\{ \eta \ \vert \ \eta \equiv 1\text{ sur } A\}$ et $h_2(A)=\nu_\rho\{ \eta \ \vert \ \eta \equiv 1\text{ sur } A\}=\rho^{\vert A\vert}.$ Par la dualité il suffit de montrer que 
+$$
+V_t h(A)\rightarrow h_1(A),
+$$
+pour tout $A$.
+
+En utilisant de l'analyse de Fourier et le théorème de Bochner on a l'existence d'une mesure $\gamma$ sur $[-\pi , \pi)^d$ tel que 
+$$
+\mu\{ \eta \ \vert \ \eta (x) =1, \eta (y) =1\}-\rho^2 =\int e^{i<y-x,\theta>}\gamma (d \theta).
+$$
+On a pu appliquer le théorème de Bochner ici car $Cov_\mu[\eta(x),\eta(y)]$ est définie positive.
+Soit $\phi (\theta ) =\sum\limits_x p(0,x) e^{i<x,\theta >}$ la fonction caractéristique des sauts de la marche aléatoire. Puisque la marche aléatoire est irréductible, $\vert \phi (\theta )\vert =1$ si et seulement si $\theta = 0$. On définit 
+$$
+W_t (x,\eta )=\sum\limits_y P^x (X(t)=y)\eta(y).
+$$
+Alors on a
+$$
+\int [W_t (x,\eta)-W_s (x, \eta)]^2 \mu (d\eta ) =\int \vert e^{-t[1-\phi (\theta )]}-e^{-s[1-\phi (\theta )]}\vert ^2 \gamma ( d\theta ),
+$$
+car $ E^x e^{i<X_t, \theta >}= e^{i<x,\theta >} e^{-t[1-\phi (\theta )]}$. On remarque que $ \int \vert e^{-t[1-\phi (\theta )]}-e^{-s[1-\phi (\theta )]}\vert ^2 \gamma ( d\theta )$ tend vers $0$ quand $s$ et $t$ tendent vers l'infini. On a donc que la limite
+$$
+W(x,\eta ) = \lim_{t\rightarrow\infty }W_t(x,\eta )
+$$ 
+existe dans $L^2 (\mu )$ pour tout $x$. Par l'équation de Chapman-Kolmogorov on obtient
+$$
+W_{t+s} (x,\eta )=\sum\limits_y P^x (X(t)=y)W_s (y,\eta )
+$$
+et donc en passant à la limite
+$$
+W (x,\eta )=\sum\limits_y P^x (X(t)=y)W (y,\eta ).
+$$
+Puisque toutes fonctions harmoniques bornées pour la marche aléatoire sont constantes, on conclut que 
+\begin{equation}\label{W}
+W(x,\eta ) =W (0,\eta ),
+\end{equation}
+pour tout $x$. En utilisant la définition de $W_t (x,\eta )$ on a
+$$
+W_t (x+u,\eta ) = W_t (x, \tau_u \eta),
+$$
+où $\tau_u \eta (y) = \eta (y + u)$. Encore une fois en passant à la limite en obtient
+$$
+W_t (x+u,\eta ) = W_t (x, \tau_u \eta),
+$$
+et donc par l'équation \eqref{W}, $W(0,\eta )$ est une variable aléatoire invariante. Puisque $\mu$ est ergodique, $W(0,\eta)$ est constante et puisque elle a pour espérance $\rho$, on conclut que
+$$
+W(x,\eta)\rightarrow \rho
+$$
+dans $L^2 (\mu )$ quand $t$ tend vers l'infini pour tout $x$. Mais
+$$
+U_t h(\{ x_1,..,x_n\}) = \int \prod_{i=1}^n W_t (x_i ,\eta ) d \mu \rightarrow \rho^n
+$$
+quand $t$ tend vers l'infini. Et donc 
+\begin{equation}\label{Ut}
+U_t h (x) \rightarrow\rho^n.
+\end{equation}
+On peut maintenant conclure, car 
+\begin{align*}
+\vert V_{t+s} h(A) -h_1 (A) \vert &\leq \vert V_s (V_t h - U_t h)(A)\vert +\vert V_s U_t h(A)- h_1 (A)\vert\\
+&\leq V_s g(A) + \vert V_s U_t h (A) -h_1 (A)\vert,
+\end{align*}
+ce qui implique par \eqref{Ut}
+$$
+\limsup_{t\rightarrow\infty} \vert V_t h(A) - h_1 (A) \vert\leq V_s g(A) + \vert V_s h_2 (A) -h_1 (A)\vert.
+$$
+Mais $V_sh_2\rightarrow h_1$ quand $s$ tend vers l'infini et $V_sg\rightarrow 0$ par le point \textit{3.} du \textit{lemme} \ref{g(0,x)} et donc on a bien que
+$$
+V_t h(A)\rightarrow h_1(A),
+$$
+ce qui conclut la preuve.
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%avant le cas transient
+
+%\begin{align*}
+%&\mu S(t) \{ \eta \ \vert \ \eta \equiv 1 \text{ sur }A\} =\int P^\eta (\eta_t \equiv 1 \text{ sur }A ) \mu (d\eta) = \int P^A (\eta \equiv 1 \text{ sur } A_t)\mu (d\eta)\\
+%&=\int P^A (\eta \equiv 1 \text{ sur } A_t, \vert A_t\vert >1))\mu(d\eta) + \sum\limits_y P^A (A_t=\{y\}) \mu \{ \eta \ \vert \ \eta (y) =1\}\\
+%&\leq \int P^A(\vert A_t\vert >1)\mu(d\eta)+\sum\limits_y P^A (A_t=\{y\}) \lambda\\
+%&=P^A(\vert A_t\vert >1)\int \mu(d\eta)+P^A(\vert A_t\vert =1)\lambda\\
+%&=P^A(\vert A_t\vert >1)+(1-P^A(\vert A_t\vert %>1))\lambda\\
+%&=(1-\lambda)P^A(\vert A_t\vert >1)+\lambda.
+%\end{align*}
+%On a aussi
+%\begin{multline*}
+%\mu S(t) \{ \eta \ \vert \ \eta \equiv 1 \text{ sur }A\} -\lambda =\int P^A (\vert A_t\vert> 1 ;\eta_t \equiv 1 \text{ sur }A_t) \mu (d\eta) -\lambda P^A(\vert A_t\vert> 1)\\
+%\geq (-\lambda)P^A(\vert A_t\vert >1)
+%\end{multline*}
+%On a donc,
+%$$
+%\vert\mu S(t) \{\eta\ \vert \ \eta\equiv 1 \text{ sur } A \} - \lambda\vert \leq (1-\lambda)P^A(\vert A_t\vert >1),
+%$$
+%ce qui tend vers $0$ quand $t\rightarrow\infty$ %par le lemme précédent.
+
+%dualité
+
+%Cette dualité nous dit donc que c'est équivalent de considérer le modèle de marches aléatoires coalescentes suivant. Posons $A_t$ le processus dual des marches aléatoire après leurs couplage au temps $t$, partant de $A$, autrement dit $A_t={(X^x_t \ \vert \ x\in A)}$. On a alors
+%$$
+%A_0 :=A, 
+%$$
+%$$
+%A_{t-t_n}:=(A\setminus \{ x_n \} ) \cup %\ y_n \},
+%$$
+%$$
+%A_{t_{i+1}-t_i}:=(A_{t_{i+1}}\setminus %\{ x_i \} ) \cup \ y_i \},
+%$$
+%pour tout $i=1,...,n-1$.
+
+
+
+
+
+
+
+
+
+
+
+%%%
+%\begin{lemma}
+%Soient $X_1 (t),...,X_n(t)$ des chaînes de Markov indépendantes et irréductibles sur l'ensemble $\mathbb{Z}^d$. De plus pour tout $i=1,...,n$
+%\end{lemma}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%Plus généralement, pour $\mu$ une mesure de probabilité sur X notons $\mu_t=\mu \mathbb{Z}^d_{(t)}$ la distribution au temps $t$ si notre distribution initiale est $\mu$ et soit $\widehat{\mu}=\mu\{\eta \ \vert\ \eta(x)=1 \ \forall x \in A\}$. Alors la dualité s'écrit\begin{equation}\widehat{\mu}_t(A)=E^A\widehat{\mu}(A_t),\label{dual}\end{equation}%        ? je ne la vois pas encore. pourquoi eta tel que... et pourquoi esperance, ca represente quoi?où $E^\eta Z=\int Z dP^\eta$, pour $Z$ une fonction mesurable.\subsection{Propriétés des mesures invariantes}Soit $\emph{H}=\{ \alpha : \mathbb{Z}^d\rightarrow[0,1]$ tel que $ \sum\limits_y p(x,y)\alpha(y)=\alpha(x) \ \forall x \in \mathbb{Z}^d\}$ l'ensemble des fonctions harmoniques sur $\mathbb{Z}^d$. Pour $\alpha\in\emph{H}$ on définit $\nu_\alpha$ comme étant la mesure produit sur $X$ avec pour marginale$$\nu_\alpha\{\eta \ \vert \ \eta(x)=1\} =\alpha(x).$$% marginale?, mesure produit? dans ce contexte...\begin{theorem}Soit $\alpha\in \emph{H}$, alors\begin{enumerate}\item la limite $\mu_\alpha=lim_{t\rightarrow\infty}\nu_\alpha S(t)$ existe,\item $\mu_\alpha$ est invariant pour le processus, %ca veut dire quoi?\item $\mu_\alpha \{ \eta\ \vert \ \eta(x)=1\}=\alpha(x) \ \forall x\in \mathbb{Z}^d$ et\item $0\leq\widehat{\mu}_\alpha (A)- \widehat{\nu}_\alpha(A)\leq g(A)\ \forall A\in \mathbb{Z}^d$ fini,\end{enumerate}où $g(A)=P^A(\vert A_t\vert < A$ pour un certain $t\geqslant 0)$.\end{theorem}
+
+
+
+
+%questions: traductions, rigoureusité...
+
+\bibliographystyle{plain}
+
+\bibliography{biblio}
+
+\end{document}
+
+
